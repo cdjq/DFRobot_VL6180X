@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DFRobot_VL6180X	KEYWORD1
+
+#######################################
+# Methods and Functions  (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+getALSValue	KEYWORD2
+getRangeResult	KEYWORD2
+getRangeVlaue	KEYWORD2
+setIICAddr	KEYWORD2
+#######################################
+# Constants   (LITERAL1)
+#######################################
+VL6180X_SINGEL	LITERAL1
+VL6180X_CONTINUOUS_RANGE	LITERAL1
+VL6180X_CONTINUOUS_ALS	LITERAL1
+VL6180X_INTERLEAVED_MODE	LITERAL1
+VL6180X_NO_ERR	LITERAL1
+VL6180X_EARLY_CONV_ERR	LITERAL1
+VL6180X_MAX_CONV_ERR	LITERAL1
+VL6180X_IGNORE_ERR	LITERAL1
+VL6180X_MAX_S_N_ERR	LITERAL1
+VL6180X_RAW_Range_UNDERFLOW_ERR	LITERAL1
+VL6180X_RAW_Range_OVERFLOW_ERR	LITERAL1
+VL6180X_Range_UNDERFLOW_ERR	LITERAL1
+VL6180X_Range_OVERFLOW_ERR	LITERAL1
