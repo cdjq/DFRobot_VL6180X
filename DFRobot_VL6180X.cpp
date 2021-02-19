@@ -55,6 +55,7 @@ bool DFRobot_VL6180X::begin(uint8_t mode,uint8_t iicaddr)
     init();
     setMode(mode);
   }
+
   write8byte(VL6180X_SYSTEM_FRESH_OUT_OF_RESET,0);
   return true;
 }

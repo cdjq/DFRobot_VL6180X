@@ -27,7 +27,7 @@ while(VL6180X.begin(mode = VL6180X.VL6180X_SINGEL,iicaddr = 0x29) == False ):
 
 while True:
   lux = VL6180X.get_als_value()
-  print('ALS vlaue : %f lux'%lux,)
+  print('ALS vlaue : %f lux'%lux)
   range = VL6180X.get_range_value()
   status = VL6180X.get_range_result()
   if(status ==VL6180X.VL6180X_NO_ERR ):

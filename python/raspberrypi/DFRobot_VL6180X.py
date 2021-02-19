@@ -13,7 +13,7 @@ import smbus
 import time
 
 class DFRobot_VL6180X:
-  L6180X_IIC_ADDRESS                          = 0x29
+  VL6180X_IIC_ADDRESS                          = 0x29
   VL6180X_IDENTIFICATION_MODEL_ID             = 0x000
   VL6180X_SYSTEM_MODE_GPIO0                   = 0X010
   VL6180X_SYSTEM_MODE_GPIO1                   = 0X011
@@ -79,7 +79,7 @@ class DFRobot_VL6180X:
     @brief  Module init
     @param  bus  Set to IICBus
   '''
-  def __init__(self,bus = 1,addr = self.L6180X_IIC_ADDRESS):
+  def __init__(self,bus = 1,addr = VL6180X_IIC_ADDRESS):
     self.__i2cbus = smbus.SMBus(bus)
     self.__i2c_addr = addr
     self.__gain = 1.0
@@ -93,7 +93,7 @@ class DFRobot_VL6180X:
     @param  iicaddr  The IIC address to be modified
     @return  Whether the device is on or not. return True succeed ;return False failed.
   '''
-  def begin(self,mode = self.VL6180X_SINGEL,iicaddr = self.L6180X_IIC_ADDRESS):
+  def begin(self,mode = VL6180X_SINGEL,iicaddr = VL6180X_IIC_ADDRESS):
     self.__set_iic_addr(iicaddr)
     device_id = self.__get_device_id()
     if device_id != self.VL6180X_ID:
@@ -113,11 +113,13 @@ class DFRobot_VL6180X:
   def get_als_value(self):
     if(self.__continuousALSMode == False):
       self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x01])
-    value = 0.0
+    value = 0
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_RESULT_ALS_VAL>>8, [self.VL6180X_RESULT_ALS_VAL])
     value = self.__i2cbus.read_byte(self.__i2c_addr)
+    value = value<<8                        
+    value |= (self.__i2cbus.read_byte(self.__i2c_addr)&0xFF)
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CLEAR>>8, [self.VL6180X_SYSTEM_INTERRUPT_CLEAR,0x02])
-    value  = (0.32*100*value)/(self.__gain*self.__atime)
+    value  = ((0.32*100*value)/(self.__gain*self.__atime))
     return value
 
   ''' 
@@ -145,7 +147,7 @@ class DFRobot_VL6180X:
     @brief  set IIC addr
     @param  addr  The IIC address to be modified
   '''
-  def set_iic_addr(self,addr):
+  def __set_iic_addr(self,addr):
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_I2C_SLAVE_DEVICE_ADDRESS>>8, [self.VL6180X_I2C_SLAVE_DEVICE_ADDRESS,addr])
     self.__i2c_addr = addr
 
@@ -198,11 +200,11 @@ class DFRobot_VL6180X:
     self.__set_als_threshold_value(0,0xFFFF)
     
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD>>8, [self.VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD,0x30])    
-    self.__set_als_gain(self.VL6180X_ALS_GAIN_40)
+    self.__set_als_gain(self.VL6180X_ALS_GAIN_1)
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_FIRMWARE_RESULT_SCALER>>8, [self.VL6180X_FIRMWARE_RESULT_SCALER,0x01])    
     
-    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO0>>8, [self.VL6180X_SYSTEM_MODE_GPIO0,0x00])    
-    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO1>>8, [self.VL6180X_SYSTEM_MODE_GPIO1,0x30])    
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO0>>8, [self.VL6180X_SYSTEM_MODE_GPIO0,0x20])    
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO1>>8, [self.VL6180X_SYSTEM_MODE_GPIO1,0x10])    
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO>>8, [self.VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO,0x24])    
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x00])    
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x00])    
