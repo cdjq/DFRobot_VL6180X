@@ -53,9 +53,8 @@ bool DFRobot_VL6180X::begin(uint8_t mode,uint8_t iicaddr)
   }
   if(read(VL6180X_SYSTEM_FRESH_OUT_OF_RESET,1)){
     init();
-    setMode(mode);
   }
-
+  setMode(mode);
   write8byte(VL6180X_SYSTEM_FRESH_OUT_OF_RESET,0);
   return true;
 }
@@ -91,7 +90,30 @@ void DFRobot_VL6180X::init()
   write8byte(0x01a6, 0x1b);
   write8byte(0x01ac, 0x3e);
   write8byte(0x01a7, 0x1f);
-  write8byte(0x0030, 0x00);
+  write8byte(0x0030, 0x00);/*
+  // Recommended : Public registers - See data sheet for more detail
+  write8byte(0x0011, 0x10); // Enables polling for ‘New Sample ready’ 
+   // when measurement completes
+  write8byte(0x010a, 0x30); // Set the averaging sample period
+   // (compromise between lower noise and 
+   // increased execution time)
+  write8byte(0x003f, 0x46); // Sets the light and dark gain (upper 
+   // nibble). Dark gain should not be 
+   // changed.
+  write8byte(0x0031, 0xFF); // sets the # of range measurements after 
+   // which auto calibration of system is
+   // performed 
+  write8byte(0x0041, 0x63); // Set ALS integration time to 100ms
+  
+  write8byte(0x002e, 0x01); // perform a single temperature calibration
+   // of the ranging sensor 
+  //Optional: Public registers - See data sheet for more detail
+  write8byte(0x001b, 0x09); // Set default ranging inter-measurement 
+   // period to 100ms
+  write8byte(0x003e, 0x31); // Set default ALS inter-measurement period 
+   // to 500ms
+  write8byte(0x0014, 0x24); // Configures interrupt on ‘New Sample 
+   // Ready threshold event’*/
   write8byte(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD,0x09);
   write8byte(VL6180X_SYSRANGE_VHV_REPEAT_RATE,0xFF);
   write8byte(VL6180X_SYSRANGE_VHV_RECALIBRATE,0x01);
@@ -106,11 +128,11 @@ void DFRobot_VL6180X::init()
   setALSThresholdValue(0,0xFFFF);
   
   write8byte(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD,0x30);
-  setALSGain(VL6180X_ALS_GAIN_40);
+  setALSGain(VL6180X_ALS_GAIN_1);
   write8byte(VL6180X_FIRMWARE_RESULT_SCALER,0x01);
   
   write8byte(VL6180X_SYSTEM_MODE_GPIO0,0x00);
-  _modeGpio1Reg.select = 4;
+  _modeGpio1Reg.select = 8;
   _modeGpio1Reg.polarity = 1;
   write8byte(VL6180X_SYSTEM_MODE_GPIO1,*((uint8_t*)(&_modeGpio1Reg)));
   
@@ -124,6 +146,8 @@ void DFRobot_VL6180X::init()
 
 void DFRobot_VL6180X::setMode(uint8_t mode)
 {
+  write8byte(VL6180X_INTERLEAVED_MODE_ENABLE,0x00);
+  delay(1);
   switch(mode){
   case VL6180X_SINGEL:
     _continuousRangeMode = false;
@@ -139,10 +163,10 @@ void DFRobot_VL6180X::setMode(uint8_t mode)
   case VL6180X_CONTINUOUS_ALS:
     _continuousRangeMode = false;
     _continuousALSMode = true;
-    write8byte(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD,0x14);
-    write8byte(VL6180X_SYSALS_INTEGRATION_PERIOD,0x63);
     _ALSStartReg.startstop = 1;
     _ALSStartReg.select = 1;
+    write8byte(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD,0x14);
+    write8byte(VL6180X_SYSALS_INTEGRATION_PERIOD,0x63);
     write8byte(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
     break;
   case VL6180X_INTERLEAVED_MODE:
@@ -167,10 +191,11 @@ uint8_t DFRobot_VL6180X::getDeviceID()
 
 float DFRobot_VL6180X::getALSValue()
 {
-  if(_continuousALSMode == false){
   _ALSStartReg.startstop = 1;
-  write8byte(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+  if(_continuousALSMode){
+    _ALSStartReg.select = 1;
   }
+  write8byte(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
   float value = read(VL6180X_RESULT_ALS_VAL,2);
   _clearIntReg.intClearSig = 2;
   write8byte(VL6180X_SYSTEM_INTERRUPT_CLEAR,*((uint8_t*)(&_clearIntReg)));
@@ -233,10 +258,11 @@ void DFRobot_VL6180X::setALSThresholdValue(uint16_t thresholdL,uint16_t threshol
 
 uint8_t DFRobot_VL6180X::getRangeVlaue()
 {
-  if(_continuousRangeMode == false){
   _rangeStartReg.startstop = 1;
-  write8byte(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
+  if(_continuousRangeMode){
+    _rangeStartReg.select = 1;
   }
+  write8byte(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
   uint8_t value = read(VL6180X_RESULT_RANGE_VAL,1);
   _clearIntReg.intClearSig = 1;
   write8byte(VL6180X_SYSTEM_INTERRUPT_CLEAR,0x07);
@@ -283,17 +309,18 @@ void DFRobot_VL6180X:: write16byte(uint16_t regAddr,uint16_t value)
 uint16_t DFRobot_VL6180X:: read(uint16_t regAddr,uint8_t readNum)
 {
   uint16_t value=0;
+  uint8_t  a ,b;
   _pWire->beginTransmission(_deviceAddr);
   _pWire->write(regAddr>>8);
-  _pWire->write(regAddr);
+  _pWire->write(regAddr&0xFF);
   _pWire->endTransmission();
   _pWire->requestFrom(_deviceAddr, readNum);
   if(readNum==1){
     value = _pWire->read();
   }else if(readNum == 2){
-    value = _pWire->read();
-    value = value << 8;
-    value |= _pWire->read();
+    b = _pWire->read();
+    a = _pWire->read();
+    value = (b<<8)|a;
   }
   return value;
 }

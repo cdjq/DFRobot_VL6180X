@@ -29,7 +29,7 @@ void setup() {
   //  Serial.println("Please check that the IIC device is properly connected!");
   //  delay(1000);
   //}
-  while(!(VL6180X.begin(VL6180X_INTERLEAVED_MODE))){
+  while(!(VL6180X.begin())){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }
@@ -74,5 +74,5 @@ void loop() {
     Serial.println("RANGE ERR: Systerm err!");
     break;
   }
-delay(1000);
+  delay(1000);
 }

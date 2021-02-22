@@ -10,19 +10,15 @@
   # @get from https://www.dfrobot.com
   # @url https://github.com/DFRobot/DFRobot_VL6180X
 """
+import sys
+sys.path.append('../')
 from DFRobot_VL6180X import DFRobot_VL6180X
 import time
 #bus iic bus
-#addr 默认设置为0x29,在VL6180X.begin(mode,iicaddr)中支持修改iic addr，默认修改是为0x29，如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
+#addr 默认设置�?x29,在VL6180X.begin(mode,iicaddr)中支持修改iic addr，默认修改是�?x29，如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
 VL6180X = DFRobot_VL6180X(bus = 1,addr=0x29)
-'''param：mode
-      VL6180X_SINGEL                    0x00           A single measurement of ALS and range
-      VL6180X_CONTINUOUS_RANGE          0x01           Continuous measuring range
-      VL6180X_CONTINUOUS_ALS            0x02           Continuous measuring ALS
-      VL6180X_INTERLEAVED_MODE          0x03           Continuous cross measurement of ALS and range
-   param： iicaddr 默认是 0x29
-'''
-while(VL6180X.begin(mode = VL6180X.VL6180X_SINGEL,iicaddr = 0x29) == False ):
+
+while(VL6180X.begin(iicaddr = 0x29) == False ):
   print ('Please check that the IIC device is properly connected')
 
 while True:
@@ -50,5 +46,4 @@ while True:
     print('RANGE ERR: RESULT__RANGE_VAL is out of range !')
   else: 
     print('RANGE ERR: Systerm err !')
-
   time.sleep(1)

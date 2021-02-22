@@ -93,7 +93,7 @@ class DFRobot_VL6180X:
     @param  iicaddr  The IIC address to be modified
     @return  Whether the device is on or not. return True succeed ;return False failed.
   '''
-  def begin(self,mode = VL6180X_SINGEL,iicaddr = VL6180X_IIC_ADDRESS):
+  def begin(self,iicaddr = VL6180X_IIC_ADDRESS):
     self.__set_iic_addr(iicaddr)
     device_id = self.__get_device_id()
     if device_id != self.VL6180X_ID:
@@ -102,7 +102,7 @@ class DFRobot_VL6180X:
     reset = self.__i2cbus.read_byte(self.__i2c_addr)
     if(reset):
       self.__init()
-      self.__set_mode(mode)
+    self.__set_mode(self.VL6180X_INTERLEAVED_MODE)
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_FRESH_OUT_OF_RESET>>8, [self.VL6180X_SYSTEM_FRESH_OUT_OF_RESET,0])
     return True 
 
@@ -111,8 +111,10 @@ class DFRobot_VL6180X:
     @return Measured ambient light data
   '''
   def get_als_value(self):
-    if(self.__continuousALSMode == False):
-      self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x01])
+    if(self.__continuousALSMode):
+      self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x03])
+    else:
+      self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x03])
     value = 0
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_RESULT_ALS_VAL>>8, [self.VL6180X_RESULT_ALS_VAL])
     value = self.__i2cbus.read_byte(self.__i2c_addr)
@@ -127,7 +129,9 @@ class DFRobot_VL6180X:
     @return Measured range data
   '''
   def get_range_value(self):
-    if(self.__continuousRangeMode == False):
+    if(self.__continuousRangeMode):
+      self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x03])
+    else:
       self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x01])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_RESULT_RANGE_VAL>>8, [self.VL6180X_RESULT_RANGE_VAL])
     value = self.__i2cbus.read_byte(self.__i2c_addr)
@@ -217,7 +221,7 @@ class DFRobot_VL6180X:
   def __set_mode(self,mode):
     if(mode == self.VL6180X_SINGEL):
       self.__continuousRangeMode = False
-      self.__continuousALSMode = False
+      self.__continuousALSMode = False      
     elif(mode == self.VL6180X_CONTINUOUS_RANGE):
       self.__continuousRangeMode = True
       self.__continuousALSMode = False
