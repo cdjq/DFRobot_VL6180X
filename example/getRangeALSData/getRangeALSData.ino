@@ -12,27 +12,27 @@
  */
 #include <DFRobot_VL6180X.h>
 #include <Wire.h>
-//iicaddr 默认设置为0x29,在VL6180X.begin(mode,iicaddr)中支持修改iic addr，默认修改是为0x29，如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
+//iicaddr 默认设置为0x29,在VL6180X.setIICAddr(iicaddr)中支持修改iic addr，如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
 //DFRobot_VL6180X VL6180X(/*addr*/0x29,/*pWire*/&Wire);
 DFRobot_VL6180X VL6180X;
 void setup() {
   Serial.begin(115200);
 
-  /** param：mode  默认是 VL6180X_SINGEL
-        VL6180X_SINGEL                    0x00           A single measurement of ALS and range
-        VL6180X_CONTINUOUS_RANGE          0x01           Continuous measuring range
-        VL6180X_CONTINUOUS_ALS            0x02           Continuous measuring ALS
-        VL6180X_INTERLEAVED_MODE          0x03           Continuous cross measurement of ALS and range
-      param： iicaddr 默认是 0x29
-  */
-  //while(!(VL6180X.begin(/*mode*/VL6180X_SINGEL,/*iicaddr*/0x29))){
-  //  Serial.println("Please check that the IIC device is properly connected!");
-  //  delay(1000);
-  //}
+
+
   while(!(VL6180X.begin())){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }
+  /** param：mode  default： VL6180X_SINGEL
+        VL6180X_SINGEL                    0x00           A single measurement of ALS and range
+        VL6180X_CONTINUOUS_RANGE          0x01           Continuous measuring range
+        VL6180X_CONTINUOUS_ALS            0x02           Continuous measuring ALS
+        VL6180X_INTERLEAVED_MODE          0x03           Continuous cross measurement of ALS and range
+  */
+  VL6180X.setMode(VL6180X_INTERLEAVED_MODE);
+  
+  //VL6180X.setIICAddr(0x29);
 }
 
 void loop() {

@@ -269,11 +269,9 @@ public:
   
   /**
    * @brief  Initialization function
-   * @param  mode  The operating mode of the sensor
-   * @param  iicaddr  The IIC address to be modified
    * @return Whether the device is on or not. return true succeed ;return false failed.
    */
-  bool begin(uint8_t mode = VL6180X_SINGEL,uint8_t iicaddr = VL6180X_IIC_ADDRESS);
+  bool begin();
 
   /**
    * @brief  Obtain ambient light data
@@ -293,25 +291,30 @@ public:
    */
   uint8_t getRangeResult();
 
-private:
-
+  /**
+   * @brief  set the operating mode of the sensor
+   * @param  mode  The operating mode of the sensor
+   */ 
+  void setMode(uint8_t mode = VL6180X_SINGEL);
+  
   /**
    * @brief  set IIC addr
    * @param  addr  The IIC address to be modified
    */
   void setIICAddr(uint8_t addr);
+  
+private:
 
   /**
    * @brief  Initialize the sensor configuration
    */
   void init();
-
+  
   /**
-   * @brief  set the operating mode of the sensor
-   * @param  mode  The operating mode of the sensor
+   * @brief  Turn off continuous mode
    */
-  void setMode(uint8_t mode);
-
+  void stopContinue();
+  
   /**
    * @brief  Gets validation information for ALS data
    * @return Authentication information
@@ -350,14 +353,14 @@ private:
    * @param  regAddr : register address
    * @param  value : Writes the value of the register
    */
-  void write8byte(uint16_t regAddr,uint8_t value);
+  void write8bit(uint16_t regAddr,uint8_t value);
 
   /**
    * @brief  config register(16 byte)
    * @param  regAddr : register address
    * @param  value : Writes the value of the register
    */
-  void write16byte(uint16_t regAddr,uint16_t value);
+  void write16bit(uint16_t regAddr,uint16_t value);
 
   /**
    * @brief  read register

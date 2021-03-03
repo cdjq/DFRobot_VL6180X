@@ -15,7 +15,7 @@ sys.path.append('../')
 from DFRobot_VL6180X import DFRobot_VL6180X
 import time
 #bus iic bus
-#addr 榛樿璁剧疆涓?x29,鍦╒L6180X.begin(mode,iicaddr)涓敮鎸佷慨鏀筰ic addr锛岄粯璁や慨鏀规槸涓?x29锛屽鏋滀慨鏀逛簡鍏朵粬鍊硷紝涓嬫浣跨敤鏃跺簲璇ュ湪瀹炰緥鍖朌FRobot_VL6180X绫荤殑鏃朵警浼犲叆淇敼鐨刬ic addr锛屽惁鍒欏皢鏃犳硶杩涜IIC閫氳
+#addr 默认设置0x29,在VL6180X.begin(mode,iicaddr)中支持修改iic addr,如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
 VL6180X = DFRobot_VL6180X(bus = 1,addr=0x29)
 
 while(VL6180X.begin(iicaddr = 0x29) == False ):
