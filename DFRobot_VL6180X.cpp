@@ -11,10 +11,10 @@
  */
 #include <DFRobot_VL6180X.h>
 
-DFRobot_VL6180X::DFRobot_VL6180X(uint8_t addr,TwoWire *pWire):
+DFRobot_VL6180X::DFRobot_VL6180X(TwoWire *pWire):
 _pWire(pWire)
 {
-  _deviceAddr = addr;
+  _deviceAddr = VL6180X_IIC_ADDRESS;
   _modeGpio1Reg.reversed=0;
   _modeGpio1Reg.select = 0;
   _modeGpio1Reg.polarity = 0;
@@ -40,16 +40,26 @@ _pWire(pWire)
   
   _gain = 1.0;
   _atime =100;
-  _continuousRangeMode = false;
-  _continuousALSMode = false;
+
 }
 
-bool DFRobot_VL6180X::begin()
+void DFRobot_VL6180X::reset(uint8_t pin)
+{
+  pinMode(pin,OUTPUT);
+  delayMicroseconds(1000);  
+  digitalWrite(pin,LOW);
+  delayMicroseconds(400);
+  digitalWrite(pin,HIGH);
+  delayMicroseconds(1000);
+}
+
+bool DFRobot_VL6180X::begin(uint8_t pin)
 {
   _pWire->begin();
   if((getDeviceID()!=VL6180X_ID)){
     return false;
   }
+  reset(pin);
   init();
   return true;
 }
@@ -91,86 +101,170 @@ void DFRobot_VL6180X::init()
   write8bit(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30);
   write8bit(VL6180X_SYSALS_ANALOGUE_GAIN, 0x46);
   write8bit(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF);
-  write16bit(VL6180X_SYSALS_INTEGRATION_PERIOD, 0x0063);
+  write8bit(VL6180X_SYSALS_INTEGRATION_PERIOD, 0x63);
   write8bit(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
   write8bit(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09);
   write8bit(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x31);
-  write8bit(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24);
+  write8bit(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x00);
   write8bit(VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 0x31);
   write8bit(VL6180X_INTERLEAVED_MODE_ENABLE, 0);
+  write8bit(VL6180X_SYSTEM_MODE_GPIO1,0x20);
   write8bit(VL6180X_SYSTEM_FRESH_OUT_OF_RESET,0);
 }
-void DFRobot_VL6180X::stopContinue()
+
+void DFRobot_VL6180X::setInterrupt(uint8_t mode)
 {
-  write8bit(VL6180X_SYSRANGE_START,0x01);
-  write8bit(VL6180X_SYSALS_START,0x01);
-  write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x00);
-  delay(300);
-}
-void DFRobot_VL6180X::setMode(uint8_t mode)
-{
-  stopContinue();
-  switch(mode){
-  case VL6180X_SINGEL:
-    _continuousRangeMode = false;
-    _continuousALSMode = false;
-    break;
-  case VL6180X_CONTINUOUS_RANGE:
-    _continuousRangeMode = true;
-    _continuousALSMode = false;
-    _rangeStartReg.startstop = 1;
-    _rangeStartReg.select = 1;
-    write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
-    break;
-  case VL6180X_CONTINUOUS_ALS:
-    _continuousRangeMode = false;
-    _continuousALSMode = true;
-    _ALSStartReg.startstop = 1;
-    _ALSStartReg.select = 1;
-    write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
-    break;
-  case VL6180X_INTERLEAVED_MODE:
-    _continuousRangeMode = true;
-    _continuousALSMode = true;
-    write8bit(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD,0x0F);
-    write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x01);
-    _ALSStartReg.startstop = 1;
-    _ALSStartReg.select = 1;
-    write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
-    break;
+  if(mode == VL6180X_DIS_INTERRUPT){
+    write8bit(VL6180X_SYSTEM_MODE_GPIO1,0x20);
+  }else if(mode == VL6180X_HIGH_INTERRUPT){
+    write8bit(VL6180X_SYSTEM_MODE_GPIO1,0x10);
+  }else if(mode == VL6180X_LOW_INTERRUPT){
+    write8bit(VL6180X_SYSTEM_MODE_GPIO1,0x30);
   }
 }
 
-uint8_t DFRobot_VL6180X::getDeviceID()
+uint8_t DFRobot_VL6180X::rangePollMeasurement()
 {
-  return (uint8_t)read(VL6180X_IDENTIFICATION_MODEL_ID,1);
+  _rangeStartReg.startstop = 1;
+  _rangeStartReg.select = 0;
+  write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
+  return rangeGetMeasurement();
 }
 
-float DFRobot_VL6180X::getALSValue()
+void DFRobot_VL6180X::rangeSetInterMeasurementPeriod(uint16_t periodMs)
 {
-  if(!_continuousALSMode){
-	_ALSStartReg.select = 0;  
-    _ALSStartReg.startstop = 1;
-    write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+  if(periodMs>10){
+    if(periodMs<2550){
+      periodMs = (periodMs/10) - 1;
+    }else{
+      periodMs = 254;
+    }
   }
-  while(4!=((read(VL6180X_RESULT_INTERRUPT_STATUS_GPIO,1)>>3)&0x7));
-  float value = read(VL6180X_RESULT_ALS_VAL,2);
+  write8bit(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, periodMs);
+}
+bool DFRobot_VL6180X::rangeConfigInterrupt(uint8_t mode)
+{
+  if(mode>VL6180X_NEW_SAMPLE_READY){
+    return false;
+  }
+  _configIntGPIOReg.rangeIntMode=mode;
+  write8bit(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO,*((uint8_t*)(&_configIntGPIOReg)));
+  return true;
+}
+bool DFRobot_VL6180X::alsConfigInterrupt(uint8_t mode)
+{
+  if(mode>VL6180X_NEW_SAMPLE_READY){
+    return false;
+  }
+  _configIntGPIOReg.alsIntMode=mode;
+  write8bit(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO,*((uint8_t*)(&_configIntGPIOReg)));
+  return true;
+}
+void DFRobot_VL6180X::DFRobot_VL6180X::setRangeThresholdValue(uint8_t thresholdL,uint8_t thresholdH)
+{
+  write8bit(VL6180X_SYSRANGE_THRESH_LOW,thresholdL);
+  write8bit(VL6180X_SYSRANGE_THRESH_HIGH,thresholdH);
+}
+void DFRobot_VL6180X::rangeStartContinuousMode()
+{
+  _rangeStartReg.startstop = 1;
+  _rangeStartReg.select = 1;
+  write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
+}
+void DFRobot_VL6180X::rangeStopContinuousMode()
+{
+  _rangeStartReg.select = 0;
+  write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
+}
+uint8_t DFRobot_VL6180X::rangeGetMeasurement()
+{
+  uint8_t value = read(VL6180X_RESULT_RANGE_VAL,1);
+  return value;
+}
+void DFRobot_VL6180X::clearAlsInterrupt(){
   _clearIntReg.intClearSig = 2;
   write8bit(VL6180X_SYSTEM_INTERRUPT_CLEAR,*((uint8_t*)(&_clearIntReg)));
+}
+void DFRobot_VL6180X::clearRangeInterrupt(){
+  _clearIntReg.intClearSig = 1;
+  write8bit(VL6180X_SYSTEM_INTERRUPT_CLEAR,*((uint8_t*)(&_clearIntReg)));
+}
+
+float DFRobot_VL6180X::alsPoLLMeasurement()
+{
+  _ALSStartReg.startstop = 1;
+  _ALSStartReg.select = 0;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+  return alsGetMeasurement();
+}
+void DFRobot_VL6180X::setALSThresholdValue(uint16_t thresholdL,uint16_t thresholdH)
+{
+  float valueL = (thresholdL * _gain)/0.32;
+  float valueH = (thresholdH * _gain)/0.32;
+  write16bit(VL6180X_SYSALS_THRESH_LOW,(uint16_t)valueL);
+  write16bit(VL6180X_SYSALS_THRESH_HIGH,(uint16_t)valueH);
+}
+
+float DFRobot_VL6180X::alsGetMeasurement()
+{
+  float value = read(VL6180X_RESULT_ALS_VAL,2);
   value  = (0.32*100*value)/(_gain*_atime);
   return value;
 }
 
-uint8_t DFRobot_VL6180X::getALSResult()
+void DFRobot_VL6180X::alsStartContinuousMode()
 {
-  return read(VL6180X_RESULT_ALS_STATUS,1)>>4;
+  _ALSStartReg.startstop = 1;
+  _ALSStartReg.select = 1;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
 }
 
+void DFRobot_VL6180X::alsStopContinuousMode()
+{
+  _ALSStartReg.select = 0;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+}
+void DFRobot_VL6180X::alsSetInterMeasurementPeriod(uint16_t periodMs)
+{
+  if(periodMs>10){
+    if(periodMs<2550){
+      periodMs = (periodMs/10) - 1;
+    }else{
+      periodMs = 254;
+    }
+  }
+  write8bit(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, periodMs);
+}
+void DFRobot_VL6180X::startInterleavedMode()
+{
+  write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x01);
+  _ALSStartReg.startstop = 1;
+  _ALSStartReg.select = 1;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+
+  
+}
+
+uint8_t DFRobot_VL6180X::rangeGetInterruptStatus()
+{
+  return (read(VL6180X_RESULT_INTERRUPT_STATUS_GPIO,1)&0x07);
+}
+
+uint8_t DFRobot_VL6180X::alsGetInterruptStatus()
+{
+  return ((read(VL6180X_RESULT_INTERRUPT_STATUS_GPIO,1)>>3)&0x07);
+}
+
+void DFRobot_VL6180X::stopInterleavedMode()
+{
+  _ALSStartReg.startstop = 1;
+  _ALSStartReg.select = 0;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+  write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x00);
+}
 bool DFRobot_VL6180X::setALSGain(uint8_t gain)
 {
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,1);
   if(gain>7){
-    write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,0);
     return false;
   }else{
     _analogueGainReg.gain = gain;
@@ -202,44 +296,15 @@ bool DFRobot_VL6180X::setALSGain(uint8_t gain)
   }
     write8bit(VL6180X_SYSALS_ANALOGUE_GAIN,*((uint8_t*)(&_analogueGainReg)));
   }
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,1);
   return true;
 }
-
-void DFRobot_VL6180X::setALSThresholdValue(uint16_t thresholdL,uint16_t thresholdH)
+uint8_t DFRobot_VL6180X::getDeviceID()
 {
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,1);
-  write16bit(VL6180X_SYSALS_THRESH_LOW,thresholdL);
-  write16bit(VL6180X_SYSALS_THRESH_HIGH,thresholdH);
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,0);
+  return (uint8_t)read(VL6180X_IDENTIFICATION_MODEL_ID,1);
 }
-
-uint8_t DFRobot_VL6180X::getRangeVlaue()
-{
-
-  if(!_continuousRangeMode){
-    _rangeStartReg.startstop = 1;
-	_rangeStartReg.select = 0;
-    write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
-  }
-  while (!(read(VL6180X_RESULT_INTERRUPT_STATUS_GPIO,1) & 0x04));
-  uint8_t value = read(VL6180X_RESULT_RANGE_VAL,1);
-  _clearIntReg.intClearSig = 1;
-  write8bit(VL6180X_SYSTEM_INTERRUPT_CLEAR,*((uint8_t*)(&_clearIntReg)));
-  return value;
-}
-
 uint8_t DFRobot_VL6180X::getRangeResult()
 {
   return read(VL6180X_RESULT_RANGE_STATUS,1)>>4;
-}
-
-void DFRobot_VL6180X::setRangeThresholdValue(uint8_t thresholdL,uint8_t thresholdH)
-{
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,1);
-  write8bit(VL6180X_SYSRANGE_THRESH_LOW,thresholdL);
-  write8bit(VL6180X_SYSRANGE_THRESH_HIGH,thresholdH);
-  write8bit(VL6180X_SYSTEM_GROUPED_PARAMETER_HOLD,0);
 }
 void DFRobot_VL6180X::setIICAddr(uint8_t addr)
 {
@@ -284,3 +349,15 @@ uint16_t DFRobot_VL6180X:: read(uint16_t regAddr,uint8_t readNum)
   }
   return value;
 }
+
+
+
+
+
+
+
+
+
+
+
+

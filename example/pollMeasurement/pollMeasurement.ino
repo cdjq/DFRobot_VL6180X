@@ -1,5 +1,5 @@
-/*!
- * @file getRangeALSData.ino
+/**!
+ * @file pollMeasurement.ino
  * @brief Measures absolute range from 0 to above 10 cm 
  * @n Measurement of ambient light data
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
@@ -11,35 +11,41 @@
  * @url  https://github.com/DFRobot/DFRobot_VL6180X
  */
 #include <DFRobot_VL6180X.h>
-#include <Wire.h>
-//iicaddr 默认设置为0x29,在VL6180X.setIICAddr(iicaddr)中支持修改iic addr，如果修改了其他值，下次使用时应该在实例化DFRobot_VL6180X类的时侯传入修改的iic addr，否则将无法进行IIC通讯
-//DFRobot_VL6180X VL6180X(/*addr*/0x29,/*pWire*/&Wire);
 DFRobot_VL6180X VL6180X;
+#if defined(ESP32) || defined(ESP8266)
+#define CE  D5
+#elif defined(__AVR__) || defined(ARDUINO_SAM_ZERO)
+#define CE  8
+#elif (defined NRF5)
+#define CE 9
+#endif
 void setup() {
-  Serial.begin(115200);
-
-
-
-  while(!(VL6180X.begin())){
+  Serial.begin(9600);
+  while(!(VL6180X.begin(/*pin*/CE))){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
-  }
-  /** param：mode  default： VL6180X_SINGEL
-        VL6180X_SINGEL                    0x00           A single measurement of ALS and range
-        VL6180X_CONTINUOUS_RANGE          0x01           Continuous measuring range
-        VL6180X_CONTINUOUS_ALS            0x02           Continuous measuring ALS
-        VL6180X_INTERLEAVED_MODE          0x03           Continuous cross measurement of ALS and range
-  */
-  VL6180X.setMode(VL6180X_INTERLEAVED_MODE);
-  
-  //VL6180X.setIICAddr(0x29);
+  }  
+  VL6180X.setIICAddr(0x39);
+  /** 
+   * 20   times gain: VL6180X_ALS_GAIN_20                       
+   * 10   times gain: VL6180X_ALS_GAIN_10                       
+   * 5    times gain: VL6180X_ALS_GAIN_5                        
+   * 2.5  times gain: VL6180X_ALS_GAIN_2_5                      
+   * 1.57 times gain: VL6180X_ALS_GAIN_1_67                     
+   * 1.27 times gain: VL6180X_ALS_GAIN_1_25                     
+   * 1    times gain: VL6180X_ALS_GAIN_1                        
+   * 40   times gain: VL6180X_ALS_GAIN_40                       
+   */
+  VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 }
 
 void loop() {
-  float lux = VL6180X.getALSValue();
+  // put your main code here, to run repeatedly:
+  float lux = VL6180X.alsPoLLMeasurement();
   String str ="ALS: "+String(lux)+" lux";
   Serial.println(str);
-  uint8_t range = VL6180X.getRangeVlaue();
+  delay(1000);
+  uint8_t range = VL6180X.rangePollMeasurement();
   uint8_t status = VL6180X.getRangeResult();
   String str1 = "Range: "+String(range) + " mm"; 
   switch(status){
