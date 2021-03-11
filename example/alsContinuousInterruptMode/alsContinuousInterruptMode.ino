@@ -30,16 +30,21 @@ void setup() {
   while(!(VL6180X.begin(/*pin*/CE))){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
-  }  
+  }
+  /*配置环境光采集周期*/  
   VL6180X.alsSetInterMeasurementPeriod(/*uint16_t periodMs*/1000);
-  /** mode
+
+  /** 开启INT引脚的通知功能
+   * mode：
    * VL6180X_DIS_INTERRUPT          不开启中断
    * VL6180X_LOW_INTERRUPT          开启中断，INT引脚默认输出低电平
    * VL6180X_HIGH_INTERRUPT         开启中断，INT引脚默认输出高电平
    * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断。
    */
   VL6180X.setInterrupt(/*mode*/VL6180X_LOW_INTERRUPT); 
-  /** mode 
+
+  /** 配置采集环境光的中断模式
+   * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
    * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -47,7 +52,8 @@ void setup() {
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
   VL6180X.alsConfigInterrupt(/*mode*/VL6180X_NEW_SAMPLE_READY); 
-  /**
+  /**设置采集增益
+   * gain:
    * 20   times gain: VL6180X_ALS_GAIN_20                       
    * 10   times gain: VL6180X_ALS_GAIN_10                       
    * 5    times gain: VL6180X_ALS_GAIN_5                        
@@ -58,6 +64,7 @@ void setup() {
    * 40   times gain: VL6180X_ALS_GAIN_40                       
   */
   VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
+
   //这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
   VL6180X.setALSThresholdValue(/*thresholdL 0-65535 */40,/*thresholdH 0-65535*/50);
   
@@ -90,12 +97,14 @@ void setup() {
     //UNO(2), Mega2560(2), Leonardo(3), microbit(P0).
   #endif
   
+  /*开启连续采集模式*/
   VL6180X.alsStartContinuousMode();
 }
 
 void loop() {
   if(flag == 1){
     flag = 0;
+    /*读取中断的状态*/
     uint8_t state = VL6180X.alsGetInterruptStatus();  
     /**  state  与设置的中断模式相对应
      * interrupt disable  :                       VL6180X_INT_DISABLE             0
@@ -105,7 +114,9 @@ void loop() {
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
     if(state == VL6180X_NEW_SAMPLE_READY){
+      /*获得采集数据*/
       float lux = VL6180X.alsGetMeasurement();
+      /*清除中断*/
       VL6180X.clearAlsInterrupt();
       String str ="ALS: "+String(lux)+" lux";
       Serial.println(str);

@@ -24,28 +24,20 @@ void setup() {
   while(!(VL6180X.begin(/*pin*/CE))){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
-  }  
+  }
+  /*更改IIC地址*/
   VL6180X.setIICAddr(0x39);
-  /** 
-   * 20   times gain: VL6180X_ALS_GAIN_20                       
-   * 10   times gain: VL6180X_ALS_GAIN_10                       
-   * 5    times gain: VL6180X_ALS_GAIN_5                        
-   * 2.5  times gain: VL6180X_ALS_GAIN_2_5                      
-   * 1.57 times gain: VL6180X_ALS_GAIN_1_67                     
-   * 1.27 times gain: VL6180X_ALS_GAIN_1_25                     
-   * 1    times gain: VL6180X_ALS_GAIN_1                        
-   * 40   times gain: VL6180X_ALS_GAIN_40                       
-   */
-  VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  /*轮询的测量环境光数据*/
   float lux = VL6180X.alsPoLLMeasurement();
   String str ="ALS: "+String(lux)+" lux";
   Serial.println(str);
   delay(1000);
+  /*轮询的测量距离*/
   uint8_t range = VL6180X.rangePollMeasurement();
+  /*获得范围值的判断结果*/
   uint8_t status = VL6180X.getRangeResult();
   String str1 = "Range: "+String(range) + " mm"; 
   switch(status){

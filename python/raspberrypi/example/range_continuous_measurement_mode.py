@@ -31,14 +31,16 @@ def int_callback(channel):
 while(VL6180X.begin(CE = 9) == False ):
   print ('Please check that the IIC device is properly connected')
 
-''' mode
+''' 配置INT的中断通知功能
+   * mode
    * VL6180X_DIS_INTERRUPT          不开启中断通知功能
    * VL6180X_LOW_INTERRUPT          开启中断通知功能，INT引脚默认输出低电平
    * VL6180X_HIGH_INTERRUPT         开启中断通知功能，INT引脚默认输出高电平
    * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断通知功能时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断
 '''
 VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
-''' mode 
+''' 配置测距的中断模式
+   * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
    * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -46,7 +48,9 @@ VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
 '''
 VL6180X.range_config_interrupt(mode = VL6180X.VL6180X_NEW_SAMPLE_READY)
+# 配置测距周期
 VL6180X.range_set_inter_measurement_period(period_ms = 1000)
+# 配置阈值
 VL6180X.set_range_threshold_value(threshold_l = 30,threshold_h = 100)
 
 GPIO.setwarnings(False)
@@ -69,8 +73,11 @@ try:
          * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
       '''
       if(VL6180X.range_get_interrupt_status() == VL6180X.VL6180X_NEW_SAMPLE_READY):
+        # 获取距离数据
         range = VL6180X.range_get_measurement()
+        # 获取距离数据的判断结果
         status = VL6180X.get_range_result()
+        # 清除测距产生的中断
         VL6180X.clear_range_interrupt()
         if(status ==VL6180X.VL6180X_NO_ERR ):
           print('Range vlaue : %d mm'%range)

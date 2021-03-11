@@ -53,9 +53,9 @@ VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
 '''
 VL6180X.als_config_interrupt(mode = VL6180X.VL6180X_NEW_SAMPLE_READY)
 VL6180X.range_config_interrupt(mode = VL6180X.VL6180X_NEW_SAMPLE_READY)
-
+#配置交叉测量周期
 VL6180X.als_set_inter_measurement_period(period_ms = 1000)
-
+#开启交叉测量
 VL6180X.start_interleaved_mode()
 
 try:
@@ -69,13 +69,18 @@ try:
          * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
       '''      
       if(VL6180X.als_get_interrupt_status() == VL6180X.VL6180X_NEW_SAMPLE_READY):
+        # 获取环境光数据
         lux = VL6180X.als_get_measurement()
+        # 清除由采集环境光所产生的中断
         VL6180X.clear_als_interrupt()
         print('ALS vlaue : %f lux'%lux) 
-
+        
       if(VL6180X.range_get_interrupt_status() == VL6180X.VL6180X_NEW_SAMPLE_READY):
+        # 获取距离数据
         range = VL6180X.range_get_measurement()
+        # 获取距离数据判断值
         status = VL6180X.get_range_result()
+        # 清除由测距产生的中断
         VL6180X.clear_range_interrupt()
         if(status ==VL6180X.VL6180X_NO_ERR ):
           print('Range vlaue : %d mm'%range)

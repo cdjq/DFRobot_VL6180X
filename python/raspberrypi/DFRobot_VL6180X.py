@@ -13,7 +13,9 @@ import smbus
 import time
 import RPi.GPIO as GPIO
 class DFRobot_VL6180X:
+  # IIC ADDR
   VL6180X_IIC_ADDRESS                          = 0x29
+  # 传感器的寄存器地址
   VL6180X_IDENTIFICATION_MODEL_ID             = 0x000
   VL6180X_SYSTEM_MODE_GPIO0                   = 0X010
   VL6180X_SYSTEM_MODE_GPIO1                   = 0X011
@@ -47,7 +49,9 @@ class DFRobot_VL6180X:
   VL6180X_I2C_SLAVE_DEVICE_ADDRESS            = 0x212
   VL6180X_INTERLEAVED_MODE_ENABLE             = 0x2A3
   
+  # 传感器的有效ID
   VL6180X_ID                                  = 0xB4
+  # 环境光的8中增益模式
   VL6180X_ALS_GAIN_20                         = 0
   VL6180X_ALS_GAIN_10                         = 1
   VL6180X_ALS_GAIN_5                          = 2
@@ -57,6 +61,7 @@ class DFRobot_VL6180X:
   VL6180X_ALS_GAIN_1                          = 6
   VL6180X_ALS_GAIN_40                         = 7
   
+  # 测量范围数据的判断结果
   VL6180X_NO_ERR                              = 0x00
   VL6180X_ALS_OVERFLOW_ERR                    = 0x01
   VL6180X_ALS_UNDERFLOW_ERR                   = 0x02
@@ -70,10 +75,12 @@ class DFRobot_VL6180X:
   VL6180X_Range_UNDERFLOW_ERR                 = 0x0E
   VL6180X_Range_OVERFLOW_ERR                  = 0x0F
   
+  # GPIO1的模式选择
   VL6180X_DIS_INTERRUPT                       = 0
   VL6180X_HIGH_INTERRUPT                      = 1
   VL6180X_LOW_INTERRUPT                       = 2
 
+  # als 和 range 的中断模式选择
   VL6180X_INT_DISABLE                         = 0
   VL6180X_LEVEL_LOW                           = 1
   VL6180X_LEVEL_HIGH                          = 2
@@ -99,10 +106,10 @@ class DFRobot_VL6180X:
 
   '''
   def begin(self,CE):
+    self.__reset(CE)
     device_id = self.__get_device_id()
     if device_id != self.VL6180X_ID:
       return False
-    self.__reset(CE)
     self.__init()
     return True 
 
@@ -263,7 +270,7 @@ class DFRobot_VL6180X:
   ''' 
     @brief  Gets the interrupt state of the ranging
     @return   return status
-    @n             0                        �?No threshold events reported
+    @n             0                        �?No threshold events reported
     @n             VL6180X_LEVEL_LOW        ：value < thresh_low
     @n             VL6180X_LEVEL_HIGH       ：value > thresh_high
     @n             VL6180X_OUT_OF_WINDOW    ：value < thresh_low OR value > thresh_high
@@ -278,7 +285,7 @@ class DFRobot_VL6180X:
   ''' 
     @brief  Gets the interrupt state of the measured light intensity
     @return   return status
-    @n             0                        �?No threshold events reported
+    @n             0                        �?No threshold events reported
     @n             VL6180X_LEVEL_LOW        ：value < thresh_low
     @n             VL6180X_LEVEL_HIGH       ：value > thresh_high
     @n             VL6180X_OUT_OF_WINDOW    ：value < thresh_low OR value > thresh_high

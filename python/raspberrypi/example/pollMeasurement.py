@@ -21,26 +21,17 @@ VL6180X = DFRobot_VL6180X(bus = 1)
 # CE与传感器的shutdown引脚相连，CE引脚编号采用BCM编码格式
 while(VL6180X.begin(CE = 12) == False ):
   print ('Please check that the IIC device is properly connected')
-
-'''
-  * 20   times gain: VL6180X_ALS_GAIN_20                       
-  * 10   times gain: VL6180X_ALS_GAIN_10                       
-  * 5    times gain: VL6180X_ALS_GAIN_5                        
-  * 2.5  times gain: VL6180X_ALS_GAIN_2_5                      
-  * 1.57 times gain: VL6180X_ALS_GAIN_1_67                     
-  * 1.27 times gain: VL6180X_ALS_GAIN_1_25                     
-  * 1    times gain: VL6180X_ALS_GAIN_1                        
-  * 40   times gain: VL6180X_ALS_GAIN_40                       
-'''
-VL6180X.set_als_gain(VL6180X.VL6180X_ALS_GAIN_1)
+# 更改IIC地址
 VL6180X.set_iic_addr(0x39)
 
 while True:
+  # 获取环境光数据
   lux = VL6180X.als_poll_measurement()
   print('ALS vlaue : %f lux'%lux)
   time.sleep(1)
-
+  # 获取距离数据
   range = VL6180X.range_poll_measurement()
+  # 获取距离数据的判断结果
   status = VL6180X.get_range_result()
   
   if(status ==VL6180X.VL6180X_NO_ERR ):

@@ -50,6 +50,7 @@ VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
 '''
 VL6180X.als_config_interrupt(mode = VL6180X.VL6180X_NEW_SAMPLE_READY)
+# 配置采集环境光数据的周期
 VL6180X.als_set_inter_measurement_period(period_ms = 1000)
 '''gain
   * 20   times gain: VL6180X_ALS_GAIN_20                       
@@ -64,6 +65,7 @@ VL6180X.als_set_inter_measurement_period(period_ms = 1000)
 VL6180X.set_als_gain(gain = VL6180X.VL6180X_ALS_GAIN_1)
 #这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
 VL6180X.set_als_threshold_value(threshold_l = 30,threshold_h = 100)
+# 开始测量
 VL6180X.als_start_continuous_mode()
 
 try:
@@ -78,7 +80,9 @@ try:
          * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
       '''
       if( VL6180X.als_get_interrupt_status()== VL6180X.VL6180X_NEW_SAMPLE_READY):
+        # 获取环境光数据
         lux = VL6180X.als_get_measurement()
+        # 清除中断
         VL6180X.clear_als_interrupt()
         print('ALS vlaue : %f lux'%lux)
 

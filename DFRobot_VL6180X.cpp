@@ -56,10 +56,10 @@ void DFRobot_VL6180X::reset(uint8_t pin)
 bool DFRobot_VL6180X::begin(uint8_t pin)
 {
   _pWire->begin();
+  reset(pin);
   if((getDeviceID()!=VL6180X_ID)){
     return false;
   }
-  reset(pin);
   init();
   return true;
 }

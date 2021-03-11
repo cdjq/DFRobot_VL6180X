@@ -26,13 +26,15 @@ void interrupt()
     flag = 1;
   }
 }
+
 void setup() {
   Serial.begin(9600);
   while(!(VL6180X.begin(/*pin*/CE))){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }  
-  /** mode
+  /** 开启INT引脚的通知功能
+   * mode：
    * VL6180X_DIS_INTERRUPT          不开启中断
    * VL6180X_LOW_INTERRUPT          开启中断，INT引脚默认输出低电平
    * VL6180X_HIGH_INTERRUPT         开启中断，INT引脚默认输出高电平
@@ -40,7 +42,8 @@ void setup() {
    */
   VL6180X.setInterrupt(/*mode*/VL6180X_HIGH_INTERRUPT); 
 
-  /** mode 
+  /** 配置采集环境光的中断模式
+   * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
    * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -48,7 +51,9 @@ void setup() {
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
   VL6180X.alsConfigInterrupt(/*mode*/VL6180X_NEW_SAMPLE_READY); 
- /** mode 
+
+  /** 配置测距的中断模式
+   * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
    * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -56,6 +61,8 @@ void setup() {
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
   VL6180X.rangeConfigInterrupt(VL6180X_NEW_SAMPLE_READY);
+
+  /*配置环境光采集周期*/  
   VL6180X.alsSetInterMeasurementPeriod(1000);
 
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
@@ -86,18 +93,16 @@ void setup() {
   attachInterrupt(/*Interrupt No*/0,interrupt,FALLING);//Open the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
     //UNO(2), Mega2560(2), Leonardo(3), microbit(P0).
   #endif
-  /**
-   * 这里用来确保连续模式的关闭，但是这里会触发一次单次测量模式下的测量
-   */
 
-  
+ /*开启交叉测量模式*/
   VL6180X.startInterleavedMode();
 
 }
 
 void loop() {
   if(flag == 1){
-    /** state 与设置的中断模式相对应
+    /** 读取测量环境光的中断状态
+     * 返回值与设置的中断模式相对应
      * No threshold events reported  :                                            0
      * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
      * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -105,16 +110,29 @@ void loop() {
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
     if(VL6180X.alsGetInterruptStatus() == VL6180X_NEW_SAMPLE_READY){
+      /*获得采集的环境光数据*/
       float lux = VL6180X.alsGetMeasurement();
+      /*清除因采集环境光而产生的中断*/
       VL6180X.clearAlsInterrupt();
       String str ="ALS: "+String(lux)+" lux";
       Serial.println(str);
       flag = 0;
     }
+    /** 读取测距中断状态
+     * 返回值与设置的中断模式相对应
+     * No threshold events reported  :                                            0
+     * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
+     * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
+     * value < thresh_low OR value > thresh_high: VL6180X_OUT_OF_WINDOW           3
+     * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
+     */
     if(VL6180X.rangeGetInterruptStatus() == VL6180X_NEW_SAMPLE_READY){
       flag = 0;
+      /*获得测量的距离数据*/
       uint8_t range = VL6180X.rangeGetMeasurement();
+      /*获得范围值的判断结果*/
       uint8_t status = VL6180X.getRangeResult();
+      /*清除因测量距离而产生的中断*/
       VL6180X.clearRangeInterrupt();
       String str1 = "Range: "+String(range) + " mm"; 
       switch(status){

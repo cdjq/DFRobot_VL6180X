@@ -30,14 +30,17 @@ void setup() {
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }  
-  /** mode
-   * VL6180X_DIS_INTERRUPT          不开启中断通知功能
-   * VL6180X_LOW_INTERRUPT          开启中断通知功能，INT引脚默认输出低电平
-   * VL6180X_HIGH_INTERRUPT         开启中断通知功能，INT引脚默认输出高电平
-   * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断通知功能时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断。
+  /** 开启INT引脚的通知功能
+   * mode：
+   * VL6180X_DIS_INTERRUPT          不开启中断
+   * VL6180X_LOW_INTERRUPT          开启中断，INT引脚默认输出低电平
+   * VL6180X_HIGH_INTERRUPT         开启中断，INT引脚默认输出高电平
+   * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断。
    */
   VL6180X.setInterrupt(/*mode*/VL6180X_HIGH_INTERRUPT); 
-  /** mode 
+
+  /** 配置测距的中断模式
+   * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
    * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -45,8 +48,13 @@ void setup() {
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
   VL6180X.rangeConfigInterrupt(VL6180X_NEW_SAMPLE_READY);
+
+  /*设置测距周期*/
   VL6180X.rangeSetInterMeasurementPeriod(1000);
+
+  /*设置阈值*/
   VL6180X.setRangeThresholdValue(/*thresholdL 0-255 */40,/*thresholdH 0-255*/100);
+
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
   attachInterrupt(digitalPinToInterrupt(D9)/*Query the interrupt number of the D9 pin*/,interrupt,FALLING);
   #else
@@ -75,6 +83,8 @@ void setup() {
   attachInterrupt(/*Interrupt No*/0,interrupt,FALLING);//Open the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
     //UNO(2), Mega2560(2), Leonardo(3), microbit(P0).
   #endif
+
+  /*开始连续测距模式*/
   VL6180X.rangeStartContinuousMode();
 
 }
@@ -89,8 +99,11 @@ void loop() {
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
     if(VL6180X.rangeGetInterruptStatus() == VL6180X_NEW_SAMPLE_READY){
+      /*获得测量的距离数据*/
       uint8_t range = VL6180X.rangeGetMeasurement();
+      /*获得范围值的判断结果*/
       uint8_t status = VL6180X.getRangeResult();
+      /*清除因测量距离而产生的中断*/
       VL6180X.clearRangeInterrupt();
       String str1 = "Range: "+String(range) + " mm"; 
       switch(status){
