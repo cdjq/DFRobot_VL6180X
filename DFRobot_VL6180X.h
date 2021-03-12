@@ -255,7 +255,7 @@ public:
    * @brief  constructed function
    * @param  pWire  When instantiate this class, you can specify its twowire
    */
-  DFRobot_VL6180X(TwoWire *pWire=&Wire);
+  DFRobot_VL6180X(uint8_t iiicAddr = VL6180X_IIC_ADDRESS,TwoWire *pWire=&Wire);
 
   /**
    * @brief  Destructor
@@ -267,7 +267,7 @@ public:
    * @brief  Initialization function
    * @return Whether the device is on or not. return true succeed ;return false failed.
    */
-  bool begin(uint8_t pin);
+  bool begin();
 
   /**
    * @brief  Configure the default level of the INT pin and enable the GPIO1 interrupt function
@@ -432,12 +432,6 @@ private:
   void init();
 
   /**
-   * @brief  reset
-   * @param  pin  The pin number attached to the CE
-   */
-  void reset(uint8_t pin);
-
-  /**
    * @brief  Gets validation information for ALS data
    * @return Authentication information
    */
@@ -464,6 +458,10 @@ private:
    */
   void stopInterleavedMode();
 
+  /**
+   * @brief  @brief  stop measuremwnt
+   */
+  void stopMeasurement();
   /**
    * @brief  config register(8 byte)
    * @param  regAddr  register address

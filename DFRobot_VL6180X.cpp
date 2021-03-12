@@ -11,10 +11,10 @@
  */
 #include <DFRobot_VL6180X.h>
 
-DFRobot_VL6180X::DFRobot_VL6180X(TwoWire *pWire):
+DFRobot_VL6180X::DFRobot_VL6180X(uint8_t iicAddr,TwoWire *pWire):
 _pWire(pWire)
 {
-  _deviceAddr = VL6180X_IIC_ADDRESS;
+  _deviceAddr = iicAddr;
   _modeGpio1Reg.reversed=0;
   _modeGpio1Reg.select = 0;
   _modeGpio1Reg.polarity = 0;
@@ -43,20 +43,9 @@ _pWire(pWire)
 
 }
 
-void DFRobot_VL6180X::reset(uint8_t pin)
-{
-  pinMode(pin,OUTPUT);
-  delayMicroseconds(1000);  
-  digitalWrite(pin,LOW);
-  delayMicroseconds(400);
-  digitalWrite(pin,HIGH);
-  delayMicroseconds(1000);
-}
-
-bool DFRobot_VL6180X::begin(uint8_t pin)
+bool DFRobot_VL6180X::begin()
 {
   _pWire->begin();
-  reset(pin);
   if((getDeviceID()!=VL6180X_ID)){
     return false;
   }
@@ -167,6 +156,7 @@ void DFRobot_VL6180X::DFRobot_VL6180X::setRangeThresholdValue(uint8_t thresholdL
 }
 void DFRobot_VL6180X::rangeStartContinuousMode()
 {
+  stopMeasurement();
   _rangeStartReg.startstop = 1;
   _rangeStartReg.select = 1;
   write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
@@ -214,6 +204,7 @@ float DFRobot_VL6180X::alsGetMeasurement()
 
 void DFRobot_VL6180X::alsStartContinuousMode()
 {
+  stopMeasurement();
   _ALSStartReg.startstop = 1;
   _ALSStartReg.select = 1;
   write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
@@ -223,6 +214,18 @@ void DFRobot_VL6180X::alsStopContinuousMode()
 {
   _ALSStartReg.select = 0;
   write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+}
+void DFRobot_VL6180X :: stopMeasurement()
+{
+  _ALSStartReg.startstop = 1;
+  _ALSStartReg.select = 0;
+  write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
+  _rangeStartReg.startstop = 1;
+  _rangeStartReg.select = 0;
+  write8bit(VL6180X_SYSRANGE_START,*((uint8_t*)(&_rangeStartReg)));
+  write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x00);
+  delay(1000);
+  write8bit(VL6180X_SYSTEM_INTERRUPT_CLEAR,7);
 }
 void DFRobot_VL6180X::alsSetInterMeasurementPeriod(uint16_t periodMs)
 {
@@ -237,12 +240,11 @@ void DFRobot_VL6180X::alsSetInterMeasurementPeriod(uint16_t periodMs)
 }
 void DFRobot_VL6180X::startInterleavedMode()
 {
+  stopMeasurement();
   write8bit(VL6180X_INTERLEAVED_MODE_ENABLE,0x01);
   _ALSStartReg.startstop = 1;
   _ALSStartReg.select = 1;
   write8bit(VL6180X_SYSALS_START,*((uint8_t*)(&_ALSStartReg)));
-
-  
 }
 
 uint8_t DFRobot_VL6180X::rangeGetInterruptStatus()

@@ -15,6 +15,7 @@ import RPi.GPIO as GPIO
 class DFRobot_VL6180X:
   # IIC ADDR
   VL6180X_IIC_ADDRESS                          = 0x29
+
   # 传感器的寄存器地址
   VL6180X_IDENTIFICATION_MODEL_ID             = 0x000
   VL6180X_SYSTEM_MODE_GPIO0                   = 0X010
@@ -51,7 +52,7 @@ class DFRobot_VL6180X:
   
   # 传感器的有效ID
   VL6180X_ID                                  = 0xB4
-  # 环境光的8中增益模式
+  # 环境光的8种增益模式
   VL6180X_ALS_GAIN_20                         = 0
   VL6180X_ALS_GAIN_10                         = 1
   VL6180X_ALS_GAIN_5                          = 2
@@ -80,7 +81,7 @@ class DFRobot_VL6180X:
   VL6180X_HIGH_INTERRUPT                      = 1
   VL6180X_LOW_INTERRUPT                       = 2
 
-  # als 和 range 的中断模式选择
+  # als/range 的中断模式选择
   VL6180X_INT_DISABLE                         = 0
   VL6180X_LEVEL_LOW                           = 1
   VL6180X_LEVEL_HIGH                          = 2
@@ -93,9 +94,9 @@ class DFRobot_VL6180X:
     @param  addr  Set to IIC addr
 
   '''
-  def __init__(self,bus = 1):
+  def __init__(self,iic_addr =VL6180X_IIC_ADDRESS,bus = 1):
     self.__i2cbus = smbus.SMBus(bus)
-    self.__i2c_addr = self.VL6180X_IIC_ADDRESS
+    self.__i2c_addr = iic_addr
     self.__gain = 1.0
     self.__atime =100
 
@@ -105,8 +106,7 @@ class DFRobot_VL6180X:
     @return   return True succeed ;return False failed.
 
   '''
-  def begin(self,CE):
-    self.__reset(CE)
+  def begin(self):
     device_id = self.__get_device_id()
     if device_id != self.VL6180X_ID:
       return False
@@ -192,6 +192,10 @@ class DFRobot_VL6180X:
 
   '''
   def range_start_continuous_mode(self):
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x01])
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x01])
+    time.sleep(0.3);
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CLEAR>>8, [self.VL6180X_SYSTEM_INTERRUPT_CLEAR,7])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x03])
   
   ''' 
@@ -245,6 +249,9 @@ class DFRobot_VL6180X:
 
   '''
   def als_start_continuous_mode(self):
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x01])
+    time.sleep(1)
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CLEAR>>8, [self.VL6180X_SYSTEM_INTERRUPT_CLEAR,7])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x03])
 
   ''' 
@@ -264,6 +271,9 @@ class DFRobot_VL6180X:
 
   '''
   def start_interleaved_mode(self):
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x01])
+    time.sleep(1)
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CLEAR>>8, [self.VL6180X_SYSTEM_INTERRUPT_CLEAR,7])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x03])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_INTERLEAVED_MODE_ENABLE>>8, [self.VL6180X_INTERLEAVED_MODE_ENABLE,0x01])
 
@@ -369,9 +379,11 @@ class DFRobot_VL6180X:
     self.set_als_gain(self.VL6180X_ALS_GAIN_1)
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO1>>8, [self.VL6180X_SYSTEM_MODE_GPIO1,0x20])    
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO>>8, [self.VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO,0x00])  
-    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_MODE_GPIO0>>8, [self.VL6180X_SYSTEM_MODE_GPIO0,0x60])  
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSRANGE_START>>8, [self.VL6180X_SYSRANGE_START,0x00])
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSALS_START>>8, [self.VL6180X_SYSALS_START,0x00])
+    self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_INTERLEAVED_MODE_ENABLE>>8, [self.VL6180X_INTERLEAVED_MODE_ENABLE,0x00])
     self.__i2cbus.write_i2c_block_data(self.__i2c_addr,self.VL6180X_SYSTEM_FRESH_OUT_OF_RESET>>8, [self.VL6180X_SYSTEM_FRESH_OUT_OF_RESET,0])
-
+    
   ''' 
     @brief  Set Range Threshold Value
     @param  thresholdL :Lower Threshold
@@ -441,20 +453,6 @@ class DFRobot_VL6180X:
     id = self.__i2cbus.read_byte(self.__i2c_addr)
     return id
 
-  ''' 
-    @brief  reset
-    @param  pin  The pin number attached to the CE
-
-  '''
-  def __reset(self, pin):
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(pin, GPIO.OUT)
-    
-    GPIO.output(pin, GPIO.LOW)
-    time.sleep(0.001)   
-    GPIO.output(pin, GPIO.HIGH)
-    time.sleep(0.001)
 
 
 

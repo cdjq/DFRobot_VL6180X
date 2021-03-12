@@ -16,8 +16,9 @@ from DFRobot_VL6180X import DFRobot_VL6180X
 import time
 import RPi.GPIO as GPIO
 
-#bus iic bus
-VL6180X = DFRobot_VL6180X(bus = 1)
+# 当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
+# bus ：iic bus
+VL6180X = DFRobot_VL6180X(iic_addr= 0x29,bus = 1)
 
 global flag
 flag = 0
@@ -27,8 +28,7 @@ def int_callback(channel):
   if flag == 0:
     flag = 1
 
-# CE与传感器的shutdown引脚相连，CE引脚编号采用BCM编码格式
-while(VL6180X.begin(CE = 9) == False ):
+while(VL6180X.begin() == False ):
   print ('Please check that the IIC device is properly connected')
 
 ''' 配置INT的中断通知功能

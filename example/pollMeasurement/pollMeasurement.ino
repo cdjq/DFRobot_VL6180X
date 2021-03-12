@@ -11,17 +11,14 @@
  * @url  https://github.com/DFRobot/DFRobot_VL6180X
  */
 #include <DFRobot_VL6180X.h>
-DFRobot_VL6180X VL6180X;
-#if defined(ESP32) || defined(ESP8266)
-#define CE  D5
-#elif defined(__AVR__) || defined(ARDUINO_SAM_ZERO)
-#define CE  8
-#elif (defined NRF5)
-#define CE 9
-#endif
+
+//当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
+//DFRobot_VL6180X VL6180X(/* iicAddr */0x29,/* TwoWire * */&Wire);
+DFRobot_VL6180X VL6180X(0x29);
+
 void setup() {
   Serial.begin(9600);
-  while(!(VL6180X.begin(/*pin*/CE))){
+  while(!(VL6180X.begin())){
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }
