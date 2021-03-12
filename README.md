@@ -2,7 +2,7 @@
 
 The VL6180X is the latest product based on ST’s patented FlightSense™technology. This is a ground-breaking technology allowing absolute distance to be measured independent of target reflectance. Instead of estimating the distance by measuring the amount of light reflected back from the object (which is significantly influenced by color and surface), the VL6180X precisely measures the time the light takes to travel to the nearest object and reflect back to the sensor (Time-of-Flight).
 
-![正反面svg效果图](https://github.com/cdjq/DFRobot_VL6180X/master/resources/images/SEN0427svg1.png)
+![正反面svg效果图](https://github.com/cdjq/DFRobot_VL6180X/blob/master/resources/images/SEN0427svg1.png)
 
 
 
