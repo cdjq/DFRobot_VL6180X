@@ -37,6 +37,7 @@ To use this library, download the library file first, paste it into the \Arduino
    * @return Whether the device is on or not. return true succeed ;return false failed.
    */
   bool begin();
+
   /**
    * @brief  Configure the default level of the INT pin and enable the GPIO1 interrupt function
    * @param  mode  Enable interrupt mode
@@ -45,16 +46,19 @@ To use this library, download the library file first, paste it into the \Arduino
    * @n            VL6180X_LOW_INTERRUPT  GPIO1 interrupt enabled, INT low by default
    */
   void setInterrupt(uint8_t mode);
+
   /**
    * @brief  A single range
    * @return   return ranging data ,uint mm
    */
   uint8_t rangePollMeasurement();
+
   /**
    * @brief  Configuration ranging period
    * @param  period_ms  Measurement period, in milliseconds
    */
   void rangeSetInterMeasurementPeriod(uint16_t periodMs);
+
   /**
    * @brief  Configure the interrupt mode for ranging
    * @param  mode  Enable interrupt mode
@@ -65,6 +69,7 @@ To use this library, download the library file first, paste it into the \Arduino
    * @n              VL6180X_NEW_SAMPLE_READY                      new sample ready                      
    */
   bool rangeConfigInterrupt(uint8_t mode);
+
   /**
    * @brief  Configure the interrupt mode for the ambient light
    * @param  mode  Enable interrupt mode
@@ -75,46 +80,56 @@ To use this library, download the library file first, paste it into the \Arduino
    * @n              VL6180X_NEW_SAMPLE_READY                      new sample ready                      
    */
   bool alsConfigInterrupt(uint8_t mode);
+
   /**
    * @brief Enable continuous ranging mode
    */
   void rangeStartContinuousMode();
+
   /**
    * @brief  Retrieve ranging data
    * @return   return ranging data ,uint mm
    */
   uint8_t rangeGetMeasurement();
+
   /**
    * @brief  Clear the ambient light interrupt
    */
   void clearAlsInterrupt();
+
   /**
    * @brief  Clear ranging interrupt
    */
   void clearRangeInterrupt();
+
   /**
    * @brief Single measurement of ambient light
    * @return   return The light intensity,uint lux
    */
   float alsPoLLMeasurement();
+
   /**
    * @brief  Obtain measured light data
    * @return   return The light intensity,uint lux
    */
   float alsGetMeasurement();
+
   /**
    * @brief  Enable continuous measurement of ambient light intensity mode
    */
   void alsStartContinuousMode();
+
   /**
    * @brief  Configure the period for measuring light intensity
    * @param  period_ms  Measurement period, in milliseconds
    */
   void alsSetInterMeasurementPeriod(uint16_t periodMs);
+
   /**
    * @brief  turn on interleaved mode
    */
   void startInterleavedMode();
+
   /**
    * @brief  Gets the interrupt state of the ranging
    * @return   return status
@@ -125,6 +140,7 @@ To use this library, download the library file first, paste it into the \Arduino
    * @n             VL6180X_NEW_SAMPLE_READY ：new sample ready
    */
   uint8_t rangeGetInterruptStatus();
+
   /**
    * @brief  Gets the interrupt state of the measured light intensity
    * @return   return status
@@ -135,16 +151,19 @@ To use this library, download the library file first, paste it into the \Arduino
    * @n             VL6180X_NEW_SAMPLE_READY ：new sample ready
    */
   uint8_t alsGetInterruptStatus();
+
   /**
    * @brief  Gets validation information for range data
    * @return Authentication information
    */
   uint8_t getRangeResult();
+
   /**
    * @brief  set IIC addr
    * @param  addr  The IIC address to be modified
    */
   void setIICAddr(uint8_t addr);
+
   /**
    * @brief  Set the ALS gain 
    * @param  gain  the value of gain(range 0-7)
@@ -159,18 +178,21 @@ To use this library, download the library file first, paste it into the \Arduino
    * @return true :Set up the success, false :Setup failed
    */
   bool setALSGain(uint8_t gain = VL6180X_ALS_GAIN_1);
+
   /**
    * @brief  Set ALS Threshold Value
    * @param  thresholdL :Lower Threshold
    * @param  thresholdH :Upper threshold
    */
   void setALSThresholdValue(uint16_t thresholdL=0x0000,uint16_t thresholdH=0xFFFF);
+
   /**
    * @brief  Set Range Threshold Value
    * @param  thresholdL :Lower Threshold
    * @param  thresholdH :Upper threshold
    */
   void setRangeThresholdValue(uint8_t thresholdL=0x00,uint8_t thresholdH=0xFF);
+
 ```
 
 ## Compatibility
