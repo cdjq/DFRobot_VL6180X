@@ -34,7 +34,7 @@ To use the library, first download the library file, paste it into the directory
     @return   return True succeed ;return False failed.
 
   '''
-  def begin(self,CE)
+  def begin(self)
 
   ''' 
     @brief  Configure the default level of the INT pin and enable the GPIO1 interrupt function

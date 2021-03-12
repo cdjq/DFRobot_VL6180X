@@ -36,7 +36,7 @@ To use this library, download the library file first, paste it into the \Arduino
    * @brief  Initialization function
    * @return Whether the device is on or not. return true succeed ;return false failed.
    */
-  bool begin(uint8_t pin);
+  bool begin();
   /**
    * @brief  Configure the default level of the INT pin and enable the GPIO1 interrupt function
    * @param  mode  Enable interrupt mode
