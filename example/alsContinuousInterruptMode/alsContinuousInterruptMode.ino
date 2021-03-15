@@ -31,7 +31,7 @@ void setup() {
     delay(1000);
   }
   /*配置环境光采集周期*/  
-  VL6180X.alsSetInterMeasurementPeriod(/*uint16_t periodMs*/1000);
+  VL6180X.alsSetInterMeasurementPeriod(/* periodMs 0-25500ms */1000);
 
   /** 开启INT引脚的通知功能
    * mode：
@@ -103,16 +103,14 @@ void setup() {
 void loop() {
   if(flag == 1){
     flag = 0;
-    /*读取中断的状态*/
-    uint8_t state = VL6180X.alsGetInterruptStatus();  
-    /**  state  与设置的中断模式相对应
+    /**  读取并判断产生的中断是否与设置中断相同
      * interrupt disable  :                       VL6180X_INT_DISABLE             0
      * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
      * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
      * value < thresh_low OR value > thresh_high: VL6180X_OUT_OF_WINDOW           3
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
-    if(state == VL6180X_NEW_SAMPLE_READY){
+    if(VL6180X.alsGetInterruptStatus() == VL6180X_OUT_OF_WINDOW){
       /*获得采集数据*/
       float lux = VL6180X.alsGetMeasurement();
       /*清除中断*/
