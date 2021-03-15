@@ -1,6 +1,6 @@
 /**!
  * @file restart.ino
- * @brief restart sensor
+ * @brief 该示例会重置传感器，并把I2C地址恢复为默认（0x29）
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
  * @author [yangfeng]<feng.yang@dfrobot.com>
