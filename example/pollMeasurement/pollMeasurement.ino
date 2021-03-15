@@ -14,7 +14,7 @@
 
 //当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
 //DFRobot_VL6180X VL6180X(/* iicAddr */0x29,/* TwoWire * */&Wire);
-DFRobot_VL6180X VL6180X(0x29);
+DFRobot_VL6180X VL6180X;
 
 void setup() {
   Serial.begin(9600);
@@ -23,7 +23,7 @@ void setup() {
     delay(1000);
   }
   /*更改IIC地址*/
-  VL6180X.setIICAddr(0x39);
+  //VL6180X.setIICAddr(0x29);
 }
 
 void loop() {
