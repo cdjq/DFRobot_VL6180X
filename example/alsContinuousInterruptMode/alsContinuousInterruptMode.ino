@@ -62,7 +62,7 @@ void setup() {
    * 1    times gain: VL6180X_ALS_GAIN_1                        
    * 40   times gain: VL6180X_ALS_GAIN_40                       
   */
-  VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
+  //VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 
   //这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
   VL6180X.setALSThresholdValue(/*thresholdL 0-65535lux */40,/*thresholdH 0-65535lux*/100);
