@@ -65,7 +65,7 @@ void setup() {
   VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 
   //这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
-  VL6180X.setALSThresholdValue(/*thresholdL 0-65535 */40,/*thresholdH 0-65535*/100);
+  VL6180X.setALSThresholdValue(/*thresholdL 0-65535lux */40,/*thresholdH 0-65535lux*/100);
   
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
   attachInterrupt(digitalPinToInterrupt(D9)/*Query the interrupt number of the D9 pin*/,interrupt,RISING);
@@ -103,7 +103,7 @@ void setup() {
 void loop() {
   if(flag == 1){
     flag = 0;
-    /**  读取并判断产生的中断是否与设置中断相同
+    /**读取并判断产生的中断是否与设置中断相同
      * interrupt disable  :                       VL6180X_INT_DISABLE             0
      * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
      * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
