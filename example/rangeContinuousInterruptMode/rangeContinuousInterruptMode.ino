@@ -12,8 +12,6 @@
  */
 #include <DFRobot_VL6180X.h>
 
-//当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
-//DFRobot_VL6180X VL6180X(/* iicAddr */0x29,/* TwoWire * */&Wire);
 DFRobot_VL6180X VL6180X;
 
 uint8_t ret= 1;
@@ -49,13 +47,13 @@ void setup() {
    * value < thresh_low OR value > thresh_high: VL6180X_OUT_OF_WINDOW           3
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
-  VL6180X.rangeConfigInterrupt(VL6180X_NEW_SAMPLE_READY);
+  VL6180X.rangeConfigInterrupt(VL6180X_OUT_OF_WINDOW);
 
   /*设置测距周期*/
-  VL6180X.rangeSetInterMeasurementPeriod(1000);
+  VL6180X.rangeSetInterMeasurementPeriod(/* periodMs 0-25500ms */1000);
 
   /*设置阈值*/
-  VL6180X.setRangeThresholdValue(/*thresholdL 0-255 */40,/*thresholdH 0-255*/100);
+  VL6180X.setRangeThresholdValue(/*thresholdL 0-255mm */40,/*thresholdH 0-255mm*/100);
 
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
   attachInterrupt(digitalPinToInterrupt(D9)/*Query the interrupt number of the D9 pin*/,interrupt,FALLING);
@@ -93,14 +91,14 @@ void setup() {
 void loop() {
   if(flag == 1){
     flag = 0;
-    /**与设置的中断模式相对应
+    /**读取并判断产生的中断是否与设置中断相同
      * No threshold events reported  :                                            0
      * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
      * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
      * value < thresh_low OR value > thresh_high: VL6180X_OUT_OF_WINDOW           3
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
-    if(VL6180X.rangeGetInterruptStatus() == VL6180X_NEW_SAMPLE_READY){
+    if(VL6180X.rangeGetInterruptStatus() == VL6180X_OUT_OF_WINDOW){
       /*获得测量的距离数据*/
       uint8_t range = VL6180X.rangeGetMeasurement();
       /*获得范围值的判断结果*/
