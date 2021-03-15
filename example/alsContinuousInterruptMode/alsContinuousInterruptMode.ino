@@ -12,8 +12,6 @@
  */
 #include <DFRobot_VL6180X.h>
 
-//当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
-//DFRobot_VL6180X VL6180X(/* iicAddr */0x29,/* TwoWire * */&Wire);
 DFRobot_VL6180X VL6180X;
 
 uint8_t flag = 0;
@@ -52,7 +50,7 @@ void setup() {
    * value < thresh_low OR value > thresh_high: VL6180X_OUT_OF_WINDOW           3
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
-  VL6180X.alsConfigInterrupt(/*mode*/VL6180X_NEW_SAMPLE_READY); 
+  VL6180X.alsConfigInterrupt(/*mode*/VL6180X_OUT_OF_WINDOW); 
   /**设置采集增益
    * gain:
    * 20   times gain: VL6180X_ALS_GAIN_20                       
@@ -67,7 +65,7 @@ void setup() {
   VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 
   //这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
-  VL6180X.setALSThresholdValue(/*thresholdL 0-65535 */40,/*thresholdH 0-65535*/50);
+  VL6180X.setALSThresholdValue(/*thresholdL 0-65535 */40,/*thresholdH 0-65535*/100);
   
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
   attachInterrupt(digitalPinToInterrupt(D9)/*Query the interrupt number of the D9 pin*/,interrupt,RISING);
