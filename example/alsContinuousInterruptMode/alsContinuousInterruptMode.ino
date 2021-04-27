@@ -1,7 +1,10 @@
 /**
  * @file alsContinuousInterruptMode.ino
- * @brief 本传感器工作可工作在四种中断模式下，分别是低于下阈值触发中断模式、高于上阈值触发中断模式、低于下阈值或者高于上阈值触发中断模式以及新样本值采集完成触发中断模式
- * @n 本示例介绍了在连续测量环境光模式下的四种中断
+ * @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt below the lower threshold
+ * @n                                                     2. Trigger interrupt above the upper threshold
+ * @n                                                     3. Trigger interrupt below the lower threshold or above the upper threshold
+ * @n                                                     4. Trigger interrupt after the new sample value acquisition
+ * @n This example introduces four interrupts under continuous measurement ambient light mode
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
  * @author [yangfeng]<feng.yang@dfrobot.com>
@@ -30,19 +33,20 @@ void setup() {
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }
-  /*配置环境光采集周期*/  
+  /*Set the ambient light acquisition period*/  
   VL6180X.alsSetInterMeasurementPeriod(/* periodMs 0-25500ms */1000);
 
-  /** 开启INT引脚的通知功能
+  /** Enable the notification function of the INT pin
    * mode：
-   * VL6180X_DIS_INTERRUPT          不开启中断
-   * VL6180X_LOW_INTERRUPT          开启中断，INT引脚默认输出低电平
-   * VL6180X_HIGH_INTERRUPT         开启中断，INT引脚默认输出高电平
-   * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断。
+   * VL6180X_DIS_INTERRUPT          Not enable interrupt
+   * VL6180X_LOW_INTERRUPT          Enable interrupt, by default the INT pin outputs low level
+   * VL6180X_HIGH_INTERRUPT         Enable interrupt, by default the INT pin outputs high level
+   * Note: When using the VL6180X_LOW_INTERRUPT mode to enable the interrupt, please use "RISING" to trigger it. When using the VL6180X_HIGH_INTERRUPT mode 
+   *       to enable the interrupt, please use "FALLING" to trigger it.
    */
   VL6180X.setInterrupt(/*mode*/VL6180X_LOW_INTERRUPT); 
 
-  /** 配置采集环境光的中断模式
+  /** Set the interrupt mode for collecting ambient light
    * mode 
    * interrupt disable  :                       VL6180X_INT_DISABLE             0
    * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
@@ -51,7 +55,7 @@ void setup() {
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
    */
   VL6180X.alsConfigInterrupt(/*mode*/VL6180X_OUT_OF_WINDOW); 
-  /**设置采集增益
+  /**Set acquisition gain
    * gain:
    * 20   times gain: VL6180X_ALS_GAIN_20                       
    * 10   times gain: VL6180X_ALS_GAIN_10                       
@@ -64,7 +68,8 @@ void setup() {
   */
   //VL6180X.setALSGain(VL6180X_ALS_GAIN_1);
 
-  //这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
+  // The interface for setting the threshold here is related to the interface for setting the gain. If you want to specify both the gain and the threshold at the same time, 
+  /*  please set the gain first and then set the threshold
   VL6180X.setALSThresholdValue(/*thresholdL 0-65535lux */40,/*thresholdH 0-65535lux*/100);
   
   #if defined(ESP32) || defined(ESP8266)||defined(ARDUINO_SAM_ZERO)
