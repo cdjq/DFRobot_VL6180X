@@ -12,7 +12,8 @@
  */
 #include <DFRobot_VL6180X.h>
 
-//当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
+//When the IIC address is changed, the address should be passed in when the class is instantiated. And it will be saved after its changing. 
+//But if the sensor is restarted by using the CE pin, the IIC address will change back to the default address 0x29
 //DFRobot_VL6180X VL6180X(/* iicAddr */0x29,/* TwoWire * */&Wire);
 DFRobot_VL6180X VL6180X;
 
@@ -22,19 +23,19 @@ void setup() {
     Serial.println("Please check that the IIC device is properly connected!");
     delay(1000);
   }
-  /*更改IIC地址*/
+  /*Change IIC address*/
   //VL6180X.setIICAddr(0x29);
 }
 
 void loop() {
-  /*轮询的测量环境光数据*/
+  /*Poll measurement of ambient light data*/
   float lux = VL6180X.alsPoLLMeasurement();
   String str ="ALS: "+String(lux)+" lux";
   Serial.println(str);
   delay(1000);
-  /*轮询的测量距离*/
+  /*Poll measurement of ranging*/
   uint8_t range = VL6180X.rangePollMeasurement();
-  /*获得范围值的判断结果*/
+  /*Get the judgment of the range value*/
   uint8_t status = VL6180X.getRangeResult();
   String str1 = "Range: "+String(range) + " mm"; 
   switch(status){
