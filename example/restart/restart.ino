@@ -1,6 +1,6 @@
 /**!
  * @file restart.ino
- * @brief 该示例会重置传感器，并把I2C地址恢复为默认（0x29）
+ * @brief The example will reset the sensor and restores the I2C address to the default
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
  * @author [yangfeng]<feng.yang@dfrobot.com>
@@ -9,7 +9,7 @@
  * @get from https://www.dfrobot.com
  * @url  https://github.com/DFRobot/DFRobot_VL6180X
  */
- uint8_t Pin 12   //设置的GPIO口与传感器的CE引脚相连
+ uint8_t Pin 12   //The GPIO port we set is connected to the CE pin in the sensor	
 void setup() {
  pinMode(pin,OUTPUT);
  digitalWrite(Pin,LOW);
