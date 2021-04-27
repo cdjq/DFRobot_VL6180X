@@ -1,7 +1,10 @@
   # -*- coding: utf-8 -*
 """ file als_continuous_measurement_mode.py
-  # @brief 本传感器工作可工作在四种中断模式下，分别是低于下阈值触发中断模式、高于上阈值触发中断模式、低于下阈值或者高于上阈值触发中断模式以及新样本值采集完成触发中断模�?
-  # @n 本示例介绍了在连续测量环境光模式下的四种中断
+  # @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt below the lower threshold
+  # @n                                                     2. Trigger interrupt above the upper threshold
+  # @n                                                     3. Trigger interrupt below the lower threshold or above the upper threshold
+  # @n                                                     4. Trigger interrupt after the new sample value acquisition
+  # @n This example introduces four interrupts under continuous measurement ambient light mode
   # @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
   # @licence     The MIT License (MIT)
   # @author      [yangfeng]<feng.yang@dfrobot.com> 
@@ -16,7 +19,8 @@ from DFRobot_VL6180X import DFRobot_VL6180X
 import time
 import RPi.GPIO as GPIO
 
-# 当iic地址被修改后，应当在实例化类时传入更改后的iic地址。iic地址被更改后掉电保存，但是，如果使用了CE引脚进行了传感器重启，iic地址会变回默认地址0x29
+# When the IIC address is changed, the address should be passed in when the class is instantiated. And it will be saved after its changing. 
+# But if the sensor is restarted by using the CE pin, the IIC address will change back to the default address 0x29
 # bus :iic bus
 VL6180X = DFRobot_VL6180X(iic_addr= 0x29,bus = 1)
 global flag
@@ -37,10 +41,11 @@ while(VL6180X.begin() == False ):
   print ('Please check that the IIC device is properly connected')
 
 ''' mode
-   * VL6180X_DIS_INTERRUPT          不开启中断通知功能
-   * VL6180X_LOW_INTERRUPT          开启中断通知功能，INT引脚默认输出低电平
-   * VL6180X_HIGH_INTERRUPT         开启中断通知功能，INT引脚默认输出高电平
-   * 注意：当使用VL6180X_LOW_INTERRUPT模式开启中断通知功能时，请用“RISING”来触发中断，当使用VL6180X_HIGH_INTERRUPT模式开启中断时，请用“FALLING”来触发中断
+   * VL6180X_DIS_INTERRUPT          Not enable interrupt notification function
+   * VL6180X_LOW_INTERRUPT          Enable interrupt notification function, by default the INT pin outputs low level
+   * VL6180X_HIGH_INTERRUPT         Enable interrupt notification function, by default the INT pin outputs high level
+   * Note: When using the VL6180X_LOW_INTERRUPT mode to enable the interrupt notification function, please use "RISING" to trigger it.
+   *       When using the VL6180X_HIGH_INTERRUPT mode to enable the interrupt notification function, please use "FALLING" to trigger it.
 '''
 VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
 ''' mode 
@@ -64,9 +69,10 @@ VL6180X.als_set_inter_measurement_period(period_ms = 1000)
   * 40   times gain: VL6180X_ALS_GAIN_40                       
 '''
 VL6180X.set_als_gain(gain = VL6180X.VL6180X_ALS_GAIN_1)
-#这里设置阈值的接口和设置增益的接口相关联，若要同时指定增益和阈值，请先设置增益，再设置阈值
+#The interface for setting the threshold here is related to the interface for setting the gain.
+#If you want to specify both the gain and the threshold at the same time, please set the gain first and then set the threshold.
 VL6180X.set_als_threshold_value(threshold_l = 30,threshold_h = 100)
-# 开始测量
+# Start measurement
 VL6180X.als_start_continuous_mode()
 
 try:
@@ -81,9 +87,9 @@ try:
          * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
       '''
       if( VL6180X.als_get_interrupt_status()== VL6180X.VL6180X_NEW_SAMPLE_READY):
-        # 获取环境光数据
+        # Get ambient light data
         lux = VL6180X.als_get_measurement()
-        # 清除中断
+        # Clear interrupt
         VL6180X.clear_als_interrupt()
         print('ALS vlaue : %f lux'%lux)
 
