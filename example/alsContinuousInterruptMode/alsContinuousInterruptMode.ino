@@ -97,18 +97,18 @@ void setup() {
    * |no need to set it to input mode with pinMode)|Interrupt No|Interrupt number is a pin digital value, such as P0 interrupt number 0, P1 is 1 |
    * |-------------------------------------------------------------------------------------------------------------------------------------------|
    */
-  attachInterrupt(/*Interrupt No*/0,interrupt,RISING);//Open the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
+  attachInterrupt(/*Interrupt No*/0,interrupt,RISING);//Enable the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
     //UNO(2), Mega2560(2), Leonardo(3), microbit(P0).
   #endif
   
-  /*开启连续采集模式*/
+  /*Start the continuous acquisition mode*/
   VL6180X.alsStartContinuousMode();
 }
 
 void loop() {
   if(flag == 1){
     flag = 0;
-    /**读取并判断产生的中断是否与设置中断相同
+    /**Read and judge whether the generated interrupt is the same as the interrupt we set before
      * interrupt disable  :                       VL6180X_INT_DISABLE             0
      * value < thresh_low :                       VL6180X_LEVEL_LOW               1 
      * value > thresh_high:                       VL6180X_LEVEL_HIGH              2
@@ -116,9 +116,9 @@ void loop() {
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
     if(VL6180X.alsGetInterruptStatus() == VL6180X_OUT_OF_WINDOW){
-      /*获得采集数据*/
+      /*Get measurement data*/
       float lux = VL6180X.alsGetMeasurement();
-      /*清除中断*/
+      /*Clear interrupt*/
       VL6180X.clearAlsInterrupt();
       String str ="ALS: "+String(lux)+" lux";
       Serial.println(str);
