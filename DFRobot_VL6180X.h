@@ -362,7 +362,7 @@ public:
   void startInterleavedMode();
 
   /**
-   * @brief  Gets the interrupt state of the ranging
+   * @brief  Get the interrupt state of the ranging
    * @return   return status
    * @n             0                          No threshold events reported
    * @n             VL6180X_LEVEL_LOW         value < thresh_low
@@ -373,7 +373,7 @@ public:
   uint8_t rangeGetInterruptStatus();
 
   /**
-   * @brief  Gets the interrupt state of the measured light intensity
+   * @brief  Get the interrupt state of the measured light intensity
    * @return   return status
    * @n             0                          No threshold events reported
    * @n             VL6180X_LEVEL_LOW         value < thresh_low
@@ -384,7 +384,7 @@ public:
   uint8_t alsGetInterruptStatus();
 
   /**
-   * @brief  Gets validation information for range data
+   * @brief  Get validation information for range data
    * @return Authentication information
    */
   uint8_t getRangeResult();
@@ -444,12 +444,12 @@ private:
   uint8_t getDeviceID();
 
   /**
-   * @brief diaable continuous ranging mode
+   * @brief disable continuous ranging mode
    */
   void rangeStopContinuousMode();
 
   /**
-   * @brief  diaable continuous measurement of ambient light intensity mode
+   * @brief  disable continuous measurement of ambient light intensity mode
    */
   void alsStopContinuousMode();
   
