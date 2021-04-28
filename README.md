@@ -21,7 +21,7 @@ The VL6180X is the latest product based on ST’s patented FlightSense™technol
 <content>
 
 ## Summary
-Measures absolute range from 0 to above 10 cm
+Measure absolute range from 0 to above 10 cm
 
 Measurement of ambient light data
 
