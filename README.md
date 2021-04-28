@@ -131,7 +131,7 @@ To use this library, download the library file first, paste it into the \Arduino
   void startInterleavedMode();
 
   /**
-   * @brief  Gets the interrupt state of the ranging
+   * @brief  Get the interrupt state of the ranging
    * @return   return status
    * @n             0                        ： No threshold events reported
    * @n             VL6180X_LEVEL_LOW        ：value < thresh_low
@@ -142,7 +142,7 @@ To use this library, download the library file first, paste it into the \Arduino
   uint8_t rangeGetInterruptStatus();
 
   /**
-   * @brief  Gets the interrupt state of the measured light intensity
+   * @brief  Get the interrupt state of the measured light intensity
    * @return   return status
    * @n             0                        ： No threshold events reported
    * @n             VL6180X_LEVEL_LOW        ：value < thresh_low
@@ -153,7 +153,7 @@ To use this library, download the library file first, paste it into the \Arduino
   uint8_t alsGetInterruptStatus();
 
   /**
-   * @brief  Gets validation information for range data
+   * @brief  Get validation information for range data
    * @return Authentication information
    */
   uint8_t getRangeResult();
