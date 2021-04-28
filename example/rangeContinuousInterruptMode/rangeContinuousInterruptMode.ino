@@ -84,7 +84,7 @@ void setup() {
    * |no need to set it to input mode with pinMode)|Interrupt No|Interrupt number is a pin digital value, such as P0 interrupt number 0, P1 is 1 |
    * |-------------------------------------------------------------------------------------------------------------------------------------------|
    */
-  attachInterrupt(/*Interrupt No*/0,interrupt,FALLING);//Open the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
+  attachInterrupt(/*Interrupt No*/0,interrupt,FALLING);//Enable the external interrupt 0, connect INT1/2 to the digital pin of the main control: 
     //UNO(2), Mega2560(2), Leonardo(3), microbit(P0).
   #endif
 
@@ -103,7 +103,7 @@ void loop() {
      * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
      */
     if(VL6180X.rangeGetInterruptStatus() == VL6180X_OUT_OF_WINDOW){
-      /*Get measured distance data*/
+      /*Get range measurement data*/
       uint8_t range = VL6180X.rangeGetMeasurement();
       /*Get the judgment of the range value*/
       uint8_t status = VL6180X.getRangeResult();
