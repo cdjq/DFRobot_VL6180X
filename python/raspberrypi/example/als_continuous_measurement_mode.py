@@ -1,8 +1,8 @@
   # -*- coding: utf-8 -*
 """ file als_continuous_measurement_mode.py
-  # @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt below the lower threshold
-  # @n                                                     2. Trigger interrupt above the upper threshold
-  # @n                                                     3. Trigger interrupt below the lower threshold or above the upper threshold
+  # @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt when below the L-threshold(lower threshold)
+  # @n                                                     2. Trigger interrupt when above the U-threshold(upper threshold)
+  # @n                                                     3. Trigger interrupt when below the L-threshold or above the U-threshold
   # @n                                                     4. Trigger interrupt after the new sample value acquisition
   # @n This example introduces four interrupts under continuous measurement ambient light mode
   # @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
@@ -19,8 +19,8 @@ from DFRobot_VL6180X import DFRobot_VL6180X
 import time
 import RPi.GPIO as GPIO
 
-# When the IIC address is changed, the address should be passed in when the class is instantiated. And it will be saved after its changing. 
-# But if the sensor is restarted by using the CE pin, the IIC address will change back to the default address 0x29
+# When the IIC address is changed, the revised address should be passed in when instantiating class. And the changed I2C address will be saved after power-down.
+# But if the sensor is restarted by using the CE pin, the IIC address will be back to the default address 0x29
 # bus :iic bus
 VL6180X = DFRobot_VL6180X(iic_addr= 0x29,bus = 1)
 global flag
@@ -56,7 +56,7 @@ VL6180X.set_interrupt(mode = VL6180X.VL6180X_HIGH_INTERRUPT)
    * new sample ready   :                       VL6180X_NEW_SAMPLE_READY        4
 '''
 VL6180X.als_config_interrupt(mode = VL6180X.VL6180X_NEW_SAMPLE_READY)
-# 配置采集环境光数据的周期
+# Set ambient light collecting period
 VL6180X.als_set_inter_measurement_period(period_ms = 1000)
 '''gain
   * 20   times gain: VL6180X_ALS_GAIN_20                       
