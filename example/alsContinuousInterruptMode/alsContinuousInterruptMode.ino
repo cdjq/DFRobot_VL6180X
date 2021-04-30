@@ -1,8 +1,8 @@
 /**
  * @file alsContinuousInterruptMode.ino
- * @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt below the lower threshold
- * @n                                                     2. Trigger interrupt above the upper threshold
- * @n                                                     3. Trigger interrupt below the lower threshold or above the upper threshold
+ * @brief The sensor can operate in four interrupt modes: 1. Trigger interrupt when below the L-threshold(lower threshold)
+ * @n                                                     2. Trigger interrupt when above the U-threshold(upper threshold)
+ * @n                                                     3. Trigger interrupt when below the L-threshold or above the U-threshold
  * @n                                                     4. Trigger interrupt after the new sample value acquisition
  * @n This example introduces four interrupts under continuous measurement ambient light mode
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
