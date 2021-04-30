@@ -33,7 +33,7 @@ void loop() {
   String str ="ALS: "+String(lux)+" lux";
   Serial.println(str);
   delay(1000);
-  /*Poll measurement of ranging*/
+  /*Poll measurement of distance*/
   uint8_t range = VL6180X.rangePollMeasurement();
   /*Get the judgment of the range value*/
   uint8_t status = VL6180X.getRangeResult();
