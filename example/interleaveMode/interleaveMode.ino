@@ -1,6 +1,6 @@
 /**
  * @file interleaveMode.ino
- * @brief This example introduced measuring light data and the range data when using the interleaved measurement mode to interrupt.
+ * @brief This example introduces how to measure light and distance under the interleaved measurement mode.
  * @copyright  Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
  * @licence     The MIT License (MIT)
  * @author [yangfeng]<feng.yang@dfrobot.com>
